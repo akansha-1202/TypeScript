@@ -123,3 +123,89 @@ Ask yourself:
 2. When does TS catch errors? → **Compile time**  
 3. Can you add a field to a TS object freely? → **No — must be predefined**  
 4. Why bother? → **Safer code + better tooling + clearer intent**
+
+---
+
+## ⚙️ Adding TypeScript to an Existing App — `tsconfig.json`
+
+> 🎯 **One-liner:** `tsconfig.json` = the rulebook that tells the TypeScript compiler *how* to work.
+
+### Step 1 — Create the rulebook
+
+Put `tsconfig.json` in the **project root** (e.g. `client/tsconfig.json`).
+
+Minimal starter:
+
+```json
+{
+  "compilerOptions": {
+    "target": "es5",
+    "outDir": "dist"
+  }
+}
+```
+
+| Option | Sticky meaning |
+|---|---|
+| **`target`** | "How old should the output JS be?" — `es5` = works in almost every browser |
+| **`outDir`** | "Where do the `.js` files go after transpile?" — usually `dist` |
+
+### Step 2 — Watch mode (auto-recompile)
+
+```bash
+tsc -w
+```
+
+| Command | What happens |
+|---|---|
+| `tsc` | Compile once |
+| `tsc -w` | **Watch** — recompiles every time you save |
+
+> 🧩 **Remember:** `-w` = "keep watching my files."
+
+### Step 3 — Prove it works
+
+1. Create a file like `hello.ts`
+2. Save it
+3. With `tsc -w` running, a `hello.js` appears in `outDir` (`dist`)
+
+```
+hello.ts  ──tsc──►  dist/hello.js
+   ↑                    ↑
+ you write this      browser runs this
+```
+
+✅ `.ts` appears → `.js` appears = setup works.
+
+---
+
+## 📖 `compilerOptions` cheat sheet (our Vite client)
+
+| Option | What it does | Sticky phrase |
+|---|---|---|
+| **`target`** | JS version to compile *down to* | "How old is the output?" |
+| **`module`** | How `import` / `export` work | "Module style" |
+| **`moduleResolution`** | How TS finds imported files | `"bundler"` for Vite |
+| **`jsx`** | How JSX is transformed | `"react-jsx"` = no React import needed |
+| **`outDir`** | Folder for compiled JS | "Put output here" |
+| **`allowJs`** | Include `.js` / `.jsx` in the project | "JS files count too" |
+| **`checkJs`** | Type-check JS files | `false` = include, don't nag yet |
+| **`strict`** | All strict type checks ON | "Be picky (good for learning)" |
+| **`noEmit`** | Don't write `.js` files | "Vite builds; TS only checks" |
+| **`skipLibCheck`** | Skip checking `node_modules` | "Faster compiles" |
+| **`isolatedModules`** | Each file must stand alone | "Required by Vite/esbuild" |
+| **`esModuleInterop`** | Smoother imports from CommonJS libs | "Play nice with npm packages" |
+| **`include`** | Which folders TS looks at | `["src"]` = only source |
+
+> 💡 **Classic `tsc` projects:** use `target` + `outDir`, run `tsc -w`.  
+> **Vite projects:** often use `noEmit: true` — Vite emits JS; TS only type-checks.
+
+---
+
+## 🔥 tsconfig recall quiz
+
+1. What file configures the TypeScript compiler? → **`tsconfig.json`**  
+2. Which option sets browser JS level? → **`target`** (e.g. `es5`)  
+3. Which option sets output folder? → **`outDir`**  
+4. How do you auto-recompile on save? → **`tsc -w`**  
+5. How do you confirm setup? → Create a `.ts` file → see `.js` in `outDir`

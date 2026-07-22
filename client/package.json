@@ -4,16 +4,20 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently -n vite,tsc -c cyan,yellow \"vite\" \"tsc -w --preserveWatchOutput\"",
+    "dev:app": "vite",
+    "typecheck": "tsc -w --preserveWatchOutput",
     "build": "vite build",
     "preview": "vite preview"
   },
   "dependencies": {
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "typescript": "^7.0.2"
   },
   "devDependencies": {
     "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^10.0.3",
     "vite": "^5.4.11"
   }
 }
