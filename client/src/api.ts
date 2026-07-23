@@ -1,14 +1,22 @@
 const API_URL: string = "/api/notes";
 
+export enum NoteType {
+    PERSONAL = "personal",
+    WORK = "work",
+    OTHER = "other",
+}
+  
 export interface Note {
   readonly id: string;
+  typeOfNote: NoteType;
   title: string;
-  content: string;
+  content?: string;
   createdAt: string;
   updatedAt: string;
 }
 
-export type NoteInput = Pick<Note, "title" | "content">;
+
+export type NoteInput = Pick<Note, "title" | "content" | "typeOfNote">;
 
 export async function getNotes(search: string = ""): Promise<Note[]> {
   const query = search ? `?q=${encodeURIComponent(search)}` : "";

@@ -1,7 +1,7 @@
 import { useEffect, useState, FormEvent, ChangeEvent } from "react";
-import { getNotes, createNote, updateNote, deleteNote, Note, NoteInput } from "./api";
+import { getNotes, createNote, updateNote, deleteNote, Note, NoteInput, NoteType } from "./api";
 
-const emptyForm: NoteInput = { title: "", content: "" };
+const emptyForm: NoteInput = { title: "", content: "" , typeOfNote: NoteType.PERSONAL};
 
 export default function App() {
   const [notes, setNotes] = useState<Note[]>([]);
@@ -28,14 +28,14 @@ export default function App() {
     loadNotes("");
   }, []);
 
-  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
   function startEdit(note: Note) {
     setEditId(note.id);
-    setForm({ title: note.title, content: note.content });
+    setForm({ title: note.title, content: note.content, typeOfNote: note.typeOfNote });
     setError("");
   }
 
@@ -107,6 +107,11 @@ export default function App() {
 
       <form className="note-form" onSubmit={handleSubmit}>
         <h2>{editId ? "Edit Note" : "Create Note"}</h2>
+        <select name="typeOfNote" value={form.typeOfNote} onChange={handleChange}>
+          <option value={NoteType.PERSONAL}>Personal</option>
+          <option value={NoteType.WORK}>Work</option>
+          <option value={NoteType.OTHER}>Other</option>
+        </select>
         <input
           name="title"
           type="text"
@@ -138,6 +143,7 @@ export default function App() {
 
         {notes.map((note) => (
           <article key={note.id} className="note-card">
+            <p>{note.typeOfNote}</p>
             <h3>{note.title}</h3>
             <p>{note.content || <em>No content</em>}</p>
             <div className="actions">

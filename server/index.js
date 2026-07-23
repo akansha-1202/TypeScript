@@ -20,6 +20,7 @@ app.use(express.json());
 // Note schema
 const noteSchema = new mongoose.Schema(
   {
+    typeOfNote: { type: String, required: true, trim: true },
     title: { type: String, required: true, trim: true },
     content: { type: String, default: "", trim: true },
   },
@@ -31,6 +32,7 @@ const Note = mongoose.model("Note", noteSchema);
 function formatNote(note) {
   return {
     id: note._id.toString(),
+    typeOfNote: note.typeOfNote,
     title: note.title,
     content: note.content,
   };
@@ -43,6 +45,7 @@ app.get("/api/notes", async (req, res) => {
     const filter = q
       ? {
           $or: [
+            { typeOfNote: { $regex: q, $options: "i" } },
             { title: { $regex: q, $options: "i" } },
             { content: { $regex: q, $options: "i" } },
           ],
@@ -72,7 +75,7 @@ app.get("/api/notes/:id", async (req, res) => {
 // CREATE note
 app.post("/api/notes", async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, typeOfNote } = req.body;
 
     if (!title || !title.trim()) {
       return res.status(400).json({ message: "Title is required" });
@@ -81,6 +84,7 @@ app.post("/api/notes", async (req, res) => {
     const note = await Note.create({
       title: title.trim(),
       content: (content || "").trim(),
+      typeOfNote: typeOfNote.trim(),
     });
 
     res.status(201).json(formatNote(note));
@@ -92,7 +96,7 @@ app.post("/api/notes", async (req, res) => {
 // UPDATE note
 app.put("/api/notes/:id", async (req, res) => {
   try {
-    const { title, content } = req.body;
+    const { title, content, typeOfNote } = req.body;
 
     if (!title || !title.trim()) {
       return res.status(400).json({ message: "Title is required" });
@@ -103,6 +107,7 @@ app.put("/api/notes/:id", async (req, res) => {
       {
         title: title.trim(),
         content: (content || "").trim(),
+        typeOfNote: typeOfNote.trim(),
       },
       { new: true }
     );

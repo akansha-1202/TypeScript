@@ -589,7 +589,177 @@ const bad: Note = {
 
 ---
 
-## 6. Master quiz
+## 6. Enums, Literal Types & Unions (`|`)
+
+> **One-liner:** Limit values to a **menu of allowed choices** — typos get caught at compile time.
+
+### Why limit values?
+
+```ts
+// ❌ Too open — typos sneak in
+let typeOfNote: string = "persnal"; // misspelled — JS/TS string allows it
+
+// ✅ Only these values allowed
+let typeOfNote: "personal" | "work" | "other" = "personal";
+typeOfNote = "persnal"; // ❌ Error — not in the list
+```
+
+> Mnemonic: **Open `string` = any word. Limited type = multiple-choice exam.**
+
+---
+
+### Literal types — simple menu with `|`
+
+List exact values with pipes. No extra runtime code.
+
+```ts
+type NoteType = "personal" | "work" | "other";
+
+let kind: NoteType = "work";     // ✅
+kind = "school";                 // ❌ not in the menu
+```
+
+```
+"personal" | "work" | "other"
+     ↑           ↑
+ exact value   OR (pick one)
+```
+
+**Use when:** You want a simple whitelist of strings/numbers.
+
+---
+
+### Enums — named set (exists at runtime)
+
+```ts
+enum NoteType {
+  PERSONAL = "personal",
+  WORK = "work",
+  OTHER = "other",
+}
+
+let kind: NoteType = NoteType.WORK; // ✅
+kind = NoteType.PERSONAL;           // ✅
+kind = "work";                      // ❌ (unless you use string enum carefully / cast)
+```
+
+| Fact | Enum |
+|---|---|
+| Syntax | `enum Name { A = "a", B = "b" }` |
+| In compiled JS? | **Yes** — produces real runtime code |
+| Autocomplete | `NoteType.` → shows members |
+| Clarity | `NoteType.WORK` reads clearer than raw `"work"` |
+
+> Mnemonic: **Enum = named menu that ships in JavaScript.**  
+> **Literal union = ghost menu (types only, erased).**
+
+---
+
+### Enum vs Literal — pick one
+
+| | **Literal union** | **Enum** |
+|---|---|---|
+| Example | `"personal" \| "work"` | `enum NoteType { ... }` |
+| Runtime code | ❌ None (erased) | ✅ Yes (object in JS) |
+| Simple? | ✅ Very | Slightly more setup |
+| Autocomplete | ✅ | ✅ via `NoteType.` |
+| Best for | Small fixed string lists | Shared named constants across app |
+
+```ts
+// Literal (lighter)
+type NoteType = "personal" | "work" | "other";
+
+// Enum (named + runtime) — like in our api.ts
+enum NoteType {
+  PERSONAL = "personal",
+  WORK = "work",
+  OTHER = "other",
+}
+```
+
+---
+
+### Unions — one variable, multiple types (`|`)
+
+`|` means **OR** — value can be one of several types (not only string literals).
+
+```ts
+// Types union
+let id: string | number = "abc";
+id = 42;       // ✅
+id = true;     // ❌
+
+// Already seen: editing or not
+let editId: string | null = null;
+editId = "note-1"; // ✅
+
+// Literals are also a union of values
+let status: "open" | "done" = "open";
+```
+
+| Pattern | Meaning |
+|---|---|
+| `string \| number` | Either a string **or** a number |
+| `string \| null` | String **or** nothing |
+| `"a" \| "b" \| "c"` | Only these exact strings |
+
+> Mnemonic: **`|` = or** — pick **one** from the list.
+
+---
+
+### Real app example (Notes)
+
+```ts
+export enum NoteType {
+  PERSONAL = "personal",
+  WORK = "work",
+  OTHER = "other",
+}
+
+export interface Note {
+  readonly id: string;
+  typeOfNote: NoteType; // must be one of the enum values
+  title: string;
+  content?: string;
+}
+
+// ❌ typo caught at compile time
+const bad = { typeOfNote: "persnal", title: "Hi" };
+
+// ✅
+const good = { typeOfNote: NoteType.PERSONAL, title: "Hi" };
+```
+
+Same idea with literals (no enum):
+
+```ts
+type NoteType = "personal" | "work" | "other";
+
+interface Note {
+  typeOfNote: NoteType;
+}
+```
+
+---
+
+### Instant cheat sheet
+
+| Tool | Syntax | Runtime? | Sticky phrase |
+|---|---|---|---|
+| Literal type | `"a" \| "b"` | No | Multiple-choice strings |
+| Enum | `enum E { A = "a" }` | Yes | Named menu in JS |
+| Type union | `string \| number` | No | One variable, many types |
+| Pipe `\|` | everywhere above | — | Means **OR** |
+
+```
+Want fixed words, no JS cost?  → literal "a" | "b"
+Want named constants in JS?    → enum
+Want string OR number OR null? → Type1 | Type2
+```
+
+---
+
+## 7. Master quiz
 
 1. Extra step in TS pipeline? → **Types**  
 2. When does TS catch errors? → **Compile time**  
@@ -611,11 +781,15 @@ const bad: Note = {
 18. Prevent reassignment? → **`readonly`**  
 19. `useState([])` — why add `<Note[]>`? → **Empty `[]` can't infer item type**  
 20. `string \| null` means? → **Union — one of those types**  
-21. Type `emptyForm` and `useState<...>` both? → **Only one needed** (other is optional)
+21. Type `emptyForm` and `useState<...>` both? → **Only one needed** (other is optional)  
+22. Limit values to `"a" \| "b"`? → **Literal type / string union**  
+23. Enum vs literal — which emits JS? → **Enum**  
+24. What does `\|` mean? → **OR** (pick one)  
+25. `string \| number` allows? → **Either string or number**
 
 ---
 
-## 7. Mnemonics + good syntax examples
+## 8. Mnemonics + good syntax examples
 
 ### Mnemonics (say them out loud)
 
@@ -644,6 +818,10 @@ const bad: Note = {
 | `useState([])` | **"Empty box needs a label"** | Use `<Note[]>` — `[]` alone is unclear |
 | `string \| null` | **"`\|` = or"** | Id string **or** nothing |
 | Double typing state | **"Type once, infer the rest"** | Don't need both `emptyForm: T` and `useState<T>` |
+| Literal types | **"Multiple-choice exam"** | Only listed values allowed |
+| Enum | **"Named menu that ships in JS"** | Runtime object + autocomplete |
+| Literal vs enum | **"Ghost menu vs real menu"** | Union erased · enum stays |
+| Pipe `\|` | **"`\|` = or"** | One of these types/values |
 
 ---
 
@@ -784,6 +962,30 @@ const [editId, setEditId] = useState<string | null>(null);
 
 > **Mnemonic:** `<...>` on `useState` = “what shape lives in this state?”
 
+#### K) Enums, literals & unions
+
+```ts
+// Literal type — no runtime code
+type Status = "open" | "done";
+let s: Status = "open";
+s = "done";   // ✅
+s = "pending"; // ❌
+
+// Enum — produces JS code
+enum NoteType {
+  PERSONAL = "personal",
+  WORK = "work",
+  OTHER = "other",
+}
+let kind: NoteType = NoteType.WORK;
+
+// Type union — one variable, multiple types
+let id: string | number = "abc";
+id = 42; // ✅
+
+let editId: string | null = null;
+```
+
 ---
 
 ### 30-second story
@@ -800,6 +1002,8 @@ const [editId, setEditId] = useState<string | null>(null);
 10. `tsconfig` = rulebook · `tsc -w` = watch on save.  
 11. `useState<Type>` = label the state box.  
 12. `Note[]` = list · `string | null` = value **or** nothing.  
-13. Type state **once** — don't double-label unless you want to.
+13. Type state **once** — don't double-label unless you want to.  
+14. `"a" \| "b"` = multiple-choice · `enum` = named menu in JS.  
+15. `\|` = **or** — one variable, several allowed types/values.
 
-> **Check me (`:`) · Believe me (`as`) · Ignore me (`any`) · Name me (`interface`) · Label state (`useState<Type>`)**
+> **Check me (`:`) · Believe me (`as`) · Ignore me (`any`) · Name me (`interface`) · Label state (`useState<Type>`) · Limit me (`\|` / `enum`)**
