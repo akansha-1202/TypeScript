@@ -112,6 +112,44 @@ function getUser(id: string) { ... } // id must be a string — no guessing
 
 > Use `npx tsc` when TypeScript is installed locally (not global).
 
+### Common error — JSX in the `return` section
+
+> The red errors on `<div>`, `<h1>`, etc. are often **not** about your JSX markup.
+
+**Cause:** In `tsconfig.json`, `"jsx": "react-jsx"` was commented out / missing.  
+TypeScript then rejects any JSX with:
+
+```
+Cannot use JSX unless the '--jsx' flag is provided.
+```
+
+**Fix:** turn JSX on (needed for `.tsx` + Vite/React):
+
+```json
+{
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  }
+}
+```
+
+| File | Needs `jsx` option? |
+|---|---|
+| `.ts` (no JSX) | No |
+| `.tsx` / JSX in return | **Yes** → `"jsx": "react-jsx"` |
+
+> Mnemonic: **`.tsx` without `jsx` flag = teacher bans HTML-looking tags.**
+
+### Compile-time errors ≠ UI errors
+
+| Where | Shows type errors? |
+|---|---|
+| Editor (red squiggles) | ✅ Yes |
+| Terminal (`tsc -w`) | ✅ Yes |
+| Browser UI (Notes app) | ❌ No |
+
+Types are erased before the browser runs. UI `error` boxes are only for **runtime** issues (API fail, network, etc.).
+
 ---
 
 ## 3. Types and Type Checking
@@ -294,7 +332,264 @@ Just want JS freedom?   → any (last resort)
 
 ---
 
-## 5. Master quiz
+## 5. Interfaces — complex types done right
+
+> **One-liner:** An interface is a **named blueprint** for an object's shape.  
+> Better than repeating big inline `{ ... }` types everywhere.
+
+### Why interfaces? (vs inline types)
+
+```ts
+// ❌ Inline — long, repeated, hard to reuse
+function getInventoryItem(trackingNumber: string): {
+  displayName: string;
+  inventoryType: string;
+  trackingNumber: string;
+  createDate: Date;
+  originalCost: number;
+} { ... }
+
+// ✅ Interface — name it once, use everywhere
+interface InventoryItem {
+  displayName: string;
+  inventoryType: string;
+  trackingNumber: string;
+  createDate: Date;
+  originalCost: number;
+}
+
+function getInventoryItem(trackingNumber: string): InventoryItem { ... }
+```
+
+| Inline `{ ... }` | `interface` |
+|---|---|
+| Fine for tiny one-off shapes | Best for complex / reused shapes |
+| Copied in many places | Define once, reuse everywhere |
+| Harder to read | Clear name = clear intent |
+
+### How to create one
+
+```ts
+interface InventoryItem {
+  displayName: string;
+  inventoryType: string;
+  trackingNumber: string;
+  createDate: Date;
+  originalCost: number;
+}
+```
+
+```
+interface Name { property: type; }
+    ↑              ↑
+ keyword        structure inside { }
+```
+
+### Use like any other type
+
+Variables, params, and return types:
+
+```ts
+// variable
+let item: InventoryItem;
+
+// parameter
+function saveItem(item: InventoryItem): void { ... }
+
+// return type
+function getInventoryItem(trackingNumber: string): InventoryItem {
+  return {
+    displayName: "MacBook Pro",
+    inventoryType: "computer",
+    trackingNumber: trackingNumber,
+    createDate: new Date(),
+    originalCost: 1200,
+  };
+}
+```
+
+### Important: interfaces erase at compile time
+
+```
+Your .ts file          →  tsc  →  JavaScript
+interface InventoryItem      (gone — no JS output)
+```
+
+- Used **only** for type checking
+- **Zero** runtime cost
+- Use liberally — clarity ↑, performance unchanged
+
+> Mnemonic: **"Interface is a ghost — helps TS, never ships in JS."**
+
+---
+
+### Structural typing ("duck typing")
+
+> If it walks like a duck and quacks like a duck → it's a duck.  
+> Same **shape** = same type — even without writing `: InventoryItem`.
+
+```ts
+interface InventoryItem {
+  displayName: string;
+  inventoryType: string;
+  trackingNumber: string;
+  createDate: Date;
+  originalCost: number;
+}
+
+// Never wrote ": InventoryItem" — but shape matches ✅
+const laptop = {
+  displayName: "MacBook Pro",
+  inventoryType: "computer",
+  trackingNumber: "TN-001",
+  createDate: new Date(),
+  originalCost: 1200,
+};
+
+function printItem(item: InventoryItem): void {
+  console.log(item.displayName);
+}
+
+printItem(laptop); // ✅ same shape → allowed
+```
+
+```ts
+const broken = {
+  displayName: "MacBook Pro",
+  // missing other fields
+};
+
+printItem(broken); // ❌ missing required properties
+```
+
+---
+
+### Methods inside interfaces
+
+Two equivalent styles:
+
+```ts
+interface InventoryItem {
+  displayName: string;
+  originalCost: number;
+
+  // style 1 — property as function type
+  calculateTax: (rate: number) => number;
+
+  // style 2 — method signature
+  printLabel(prefix: string): void;
+}
+```
+
+```ts
+const chair: InventoryItem = {
+  displayName: "Office Chair",
+  originalCost: 299,
+  calculateTax(rate) {
+    return this.originalCost * rate;
+  },
+  printLabel(prefix) {
+    console.log(`${prefix}: ${this.displayName}`);
+  },
+};
+```
+
+---
+
+### Optional properties (`?`)
+
+`?` means the property **may be missing**:
+
+```ts
+interface InventoryItem {
+  displayName: string;
+  trackingNumber: string;
+  notes?: string; // optional
+}
+
+const a: InventoryItem = {
+  displayName: "Desk",
+  trackingNumber: "TN-002",
+}; // ✅ notes omitted
+
+const b: InventoryItem = {
+  displayName: "Desk",
+  trackingNumber: "TN-002",
+  notes: "Near window",
+}; // ✅ notes provided
+```
+
+> Mnemonic: **`?` = "maybe"**
+
+---
+
+### Readonly properties
+
+`readonly` = set once, never change later:
+
+```ts
+interface InventoryItem {
+  readonly trackingNumber: string;
+  displayName: string;
+}
+
+const item: InventoryItem = {
+  trackingNumber: "TN-001",
+  displayName: "Laptop",
+};
+
+item.displayName = "Gaming Laptop"; // ✅
+item.trackingNumber = "TN-999";     // ❌ cannot assign to readonly
+```
+
+> Mnemonic: **`readonly` = permanent ink**
+
+---
+
+### Notes app example (practical)
+
+```ts
+interface Note {
+  readonly id: string;
+  title: string;
+  content: string;
+  createdAt?: Date;
+}
+
+function createNote(note: Note): Promise<Note> { ... }
+function updateNote(id: string, note: Note): Promise<Note> { ... }
+
+const draft: Note = {
+  id: "1",
+  title: "Learn interfaces",
+  content: "Named blueprints > giant inline types",
+};
+```
+
+TS catches mistakes early:
+
+```ts
+const bad: Note = {
+  id: "1",
+  title: "Oops",
+  // missing content ❌
+};
+```
+
+---
+
+### Quick compare
+
+| Feature | Syntax | Meaning |
+|---|---|---|
+| Required prop | `title: string` | Must exist |
+| Optional prop | `notes?: string` | Can omit |
+| Readonly prop | `readonly id: string` | Can't reassign |
+| Method | `print(): void` | Function on the object |
+
+---
+
+## 6. Master quiz
 
 1. Extra step in TS pipeline? → **Types**  
 2. When does TS catch errors? → **Compile time**  
@@ -308,11 +603,19 @@ Just want JS freedom?   → any (last resort)
 10. `as` means? → **"Believe me"** (label only, no conversion)  
 11. `:` vs `as`? → **`:` checks · `as` trusts**  
 12. Inline return object — can you `return null`? → **No** (unless type allows null)  
-13. What must match an inline return shape? → **Every property name + type**
+13. What must match an inline return shape? → **Every property name + type**  
+14. Keyword for a named object blueprint? → **`interface`**  
+15. Do interfaces appear in compiled JS? → **No** (erased)  
+16. Same shape, different name — allowed? → **Yes** (structural / duck typing)  
+17. Optional property mark? → **`?`**  
+18. Prevent reassignment? → **`readonly`**  
+19. `useState([])` — why add `<Note[]>`? → **Empty `[]` can't infer item type**  
+20. `string \| null` means? → **Union — one of those types**  
+21. Type `emptyForm` and `useState<...>` both? → **Only one needed** (other is optional)
 
 ---
 
-## 6. Mnemonics + good syntax examples
+## 7. Mnemonics + good syntax examples
 
 ### Mnemonics (say them out loud)
 
@@ -326,10 +629,21 @@ Just want JS freedom?   → any (last resort)
 | 7 primitives | **"Some Booleans Need Big Null Undefined Symbols"** | string, boolean, number, bigint, null, undefined, symbol |
 | Functions | **"In → out → void"** | params in, return out, void = nothing |
 | Inline object | **"Colon, curly, props"** | `): { a: string; b: number }` |
+| Interface | **"Named blueprint"** | Reuse complex shapes |
+| Interface at runtime | **"Ghost type"** | Exists for TS only, erased in JS |
+| Duck typing | **"Same shape = same type"** | Structure matters, not the label |
+| Optional | **`?` = maybe** | Can omit the property |
+| Readonly | **"Permanent ink"** | Set once, never change |
 | Inference | **"Auto-sticker, still stuck"** | TS guesses type; still locked |
 | `:` / `as` / `any` | **"Check me · Believe me · Ignore me"** | explicit / assertion / any |
 | `as` | **"New sticker, same box"** | Label changes, value doesn't |
 | `tsc -w` | **"W = Watch forever"** | Recompiles on every save |
+| JSX error in return | **"`.tsx` needs jsx flag"** | Enable `"jsx": "react-jsx"` |
+| Type errors in UI? | **"TS = editor/terminal, not browser"** | Compile-time ≠ UI |
+| `useState` generic | **"`<Type>` = what lives in state"** | Types `form` / `notes` / `editId` |
+| `useState([])` | **"Empty box needs a label"** | Use `<Note[]>` — `[]` alone is unclear |
+| `string \| null` | **"`\|` = or"** | Id string **or** nothing |
+| Double typing state | **"Type once, infer the rest"** | Don't need both `emptyForm: T` and `useState<T>` |
 
 ---
 
@@ -359,7 +673,7 @@ function printLabel(label: string): void {
 }
 ```
 
-#### D) Inline object return (from lesson screenshot)
+#### D) Inline object return
 
 ```ts
 function getInventoryItem(trackingNumber: string): {
@@ -379,14 +693,41 @@ function getInventoryItem(trackingNumber: string): {
 }
 ```
 
-#### E) Inference vs explicit
+#### E) Interface (preferred for complex shapes)
+
+```ts
+interface InventoryItem {
+  readonly trackingNumber: string;
+  displayName: string;
+  inventoryType: string;
+  createDate: Date;
+  originalCost: number;
+  notes?: string;
+  calculateTax(rate: number): number;
+}
+
+function getInventoryItem(trackingNumber: string): InventoryItem {
+  return {
+    trackingNumber,
+    displayName: "Office Chair",
+    inventoryType: "furniture",
+    createDate: new Date(),
+    originalCost: 299,
+    calculateTax(rate) {
+      return this.originalCost * rate;
+    },
+  };
+}
+```
+
+#### F) Inference vs explicit
 
 ```ts
 let title = "Notes";           // inferred: string
 let title: string = "Notes";   // explicit: string
 ```
 
-#### F) `any` vs real type
+#### G) `any` vs real type
 
 ```ts
 let loose: any = "hello";
@@ -396,19 +737,52 @@ let tight: string = "hello";
 tight = 99; // ❌ blocked
 ```
 
-#### G) `as` — correct usage
+#### H) `as` — correct usage
 
 ```ts
 const el = document.getElementById("app") as HTMLDivElement;
 el.innerText = "Inventory App";
 ```
 
-#### H) `as` — wrong usage (don't do this)
+#### I) `as` — wrong usage (don't do this)
 
 ```ts
 const cost = "1200" as unknown as number; // TS happy, runtime still string
 const realCost = Number("1200");          // ✅ actual conversion
 ```
+
+#### J) `useState` typing (React + TS)
+
+```ts
+// Type once on the value — useState can infer
+const emptyForm: NoteInput = { title: "", content: "" };
+const [form, setForm] = useState(emptyForm); // infers NoteInput
+
+// OR type once on useState — also fine
+const [form, setForm] = useState<NoteInput>({ title: "", content: "" });
+
+// Both together works but is redundant:
+const emptyForm: NoteInput = { title: "", content: "" };
+const [form, setForm] = useState<NoteInput>(emptyForm);
+```
+
+```ts
+// Empty array → MUST tell TS the item type
+const [notes, setNotes] = useState<Note[]>([]);
+// <Note[]> = array of Note · [] = start empty
+
+// Union → value can be one of these
+const [editId, setEditId] = useState<string | null>(null);
+// string = editing this id · null = not editing
+```
+
+| State | Type | Starts as | Means |
+|---|---|---|---|
+| `form` | `NoteInput` | `{ title: "", content: "" }` | Create/edit fields |
+| `notes` | `Note[]` | `[]` | List of notes |
+| `editId` | `string \| null` | `null` | One id, or none |
+
+> **Mnemonic:** `<...>` on `useState` = “what shape lives in this state?”
 
 ---
 
@@ -419,7 +793,13 @@ const realCost = Number("1200");          // ✅ actual conversion
 3. Inference = auto-guess — still locked.  
 4. `any` = free period (no checking).  
 5. `as` = new sticker — contents unchanged.  
-6. Inline `{ ... }` return = form with required fields.  
-7. `tsconfig` = rulebook · `tsc -w` = watch on save.
+6. Inline `{ ... }` = one-off form.  
+7. `interface` = **named reusable form** (ghost in JS).  
+8. Same shape = same type (duck typing).  
+9. `?` = maybe · `readonly` = permanent ink.  
+10. `tsconfig` = rulebook · `tsc -w` = watch on save.  
+11. `useState<Type>` = label the state box.  
+12. `Note[]` = list · `string | null` = value **or** nothing.  
+13. Type state **once** — don't double-label unless you want to.
 
-> **Check me (`:`) · Believe me (`as`) · Ignore me (`any`)**
+> **Check me (`:`) · Believe me (`as`) · Ignore me (`any`) · Name me (`interface`) · Label state (`useState<Type>`)**

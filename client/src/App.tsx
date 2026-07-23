@@ -1,13 +1,13 @@
-import { useEffect, useState } from "react";
-import { getNotes, createNote, updateNote, deleteNote } from "./api.ts";
+import { useEffect, useState, FormEvent, ChangeEvent } from "react";
+import { getNotes, createNote, updateNote, deleteNote, Note, NoteInput } from "./api";
 
-const emptyForm = { title: "", content: "" };
+const emptyForm: NoteInput = { title: "", content: "" };
 
 export default function App() {
-  const [notes, setNotes] = useState([]);
+  const [notes, setNotes] = useState<Note[]>([]);
   const [search, setSearch] = useState("");
-  const [form, setForm] = useState(emptyForm);
-  const [editId, setEditId] = useState(null);
+  const [form, setForm] = useState<NoteInput>(emptyForm);
+  const [editId, setEditId] = useState<string | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -18,7 +18,7 @@ export default function App() {
       const data = await getNotes(query);
       setNotes(data);
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -28,12 +28,12 @@ export default function App() {
     loadNotes("");
   }, []);
 
-  function handleChange(e) {
+  function handleChange(e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     const { name, value } = e.target;
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function startEdit(note) {
+  function startEdit(note: Note) {
     setEditId(note.id);
     setForm({ title: note.title, content: note.content });
     setError("");
@@ -44,7 +44,7 @@ export default function App() {
     setForm(emptyForm);
   }
 
-  async function handleSubmit(e) {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError("");
 
@@ -58,11 +58,11 @@ export default function App() {
       setEditId(null);
       await loadNotes(search);
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   }
 
-  async function handleDelete(id) {
+  async function handleDelete(id: string) {
     if (!window.confirm("Delete this note?")) return;
 
     try {
@@ -70,11 +70,11 @@ export default function App() {
       if (editId === id) cancelEdit();
       await loadNotes(search);
     } catch (err) {
-      setError(err.message);
+      setError(err instanceof Error ? err.message : "Something went wrong");
     }
   }
 
-  function handleSearch(e) {
+  function handleSearch(e: FormEvent) {
     e.preventDefault();
     loadNotes(search);
   }
@@ -82,7 +82,7 @@ export default function App() {
   return (
     <div className="app">
       <h1>Notes App</h1>
-      <p className="subtitle">Simple React + JavaScript CRUD (ready to convert to TypeScript)</p>
+      <p className="subtitle">Simple React + Vite CRUD (api in TypeScript)</p>
 
       {error && <div className="error">{error}</div>}
 
