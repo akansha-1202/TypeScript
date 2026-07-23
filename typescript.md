@@ -1,227 +1,126 @@
-# What is TypeScript?
+# TypeScript Notes
 
-> 🎯 **One-liner:** TypeScript = JavaScript + types + better tooling  
-> Catch bugs at **compile time**, write code for **humans**, not just machines.
-
----
-
-## 🧠 Memory Hook
-
-```
-JS  = flexible, fast to write, errors at RUNTIME 💥
-TS  = intentional, safer, errors at COMPILE TIME ✅
-```
-
-**TS is 3 things at once:**
-
-| # | What | Remember as |
-|---|------|-------------|
-| 1 | A **transpiler** | Turns TS → JS (like a translator) |
-| 2 | Uses **future JS today** | Tomorrow's features, today |
-| 3 | A **superset** of JS | JS + strong & static typing |
-
-> 💡 Every valid JS file is already valid TS. TS just adds more.
+> **TypeScript = JavaScript + types + tooling**  
+> Errors at **compile time**, not runtime. Types are contracts for humans.
 
 ---
 
-## 🔄 The Pipeline (stick this visual)
+## 1. What is TypeScript?
 
-### JavaScript path
-```
-JS  →  ES Future  →  ES Current  →  Widely Supported
-```
+TS is three things:
 
-### TypeScript path
-```
-TS  →  Types  →  ES Future  →  ES Current  →  Widely Supported
-         ↑
-    (extra safety layer)
-```
-
-**Mnemonic:** *TS puts Types first, then rides the same JS train.*
-
----
-
-## ⚡ Dynamic vs Static Typing
-
-| | **Dynamic (JS)** | **Static (TS)** |
+| # | Role | Meaning |
 |---|---|---|
-| Variables | Can be any type, anytime | Assigned a type — **never changes** |
-| Object fields | Add by just assigning | Must be **predefined** |
-| When errors show | 💥 Runtime (too late) | ✅ Compile time (before you run) |
+| 1 | **Transpiler** | Turns TS → JS |
+| 2 | **Future JS today** | Use newer features before browsers catch up |
+| 3 | **Superset of JS** | Valid JS is valid TS — plus static typing |
 
-### Quick mental picture
+### Pipeline
+
+```
+JS:  ES Future → ES Current → Widely Supported
+TS:  Types → ES Future → ES Current → Widely Supported
+```
+
+### Dynamic (JS) vs Static (TS)
+
+| | JavaScript | TypeScript |
+|---|---|---|
+| Variables | Any type, anytime | Type is locked |
+| Object fields | Add anytime | Must be predefined |
+| Errors | Runtime 💥 | Compile time ✅ |
 
 ```js
-// JS — shape-shifting 🦎
+// JS — flexible
 let x = 5;
-x = "hello";     // ok
-x = true;        // ok
-obj.newField = 1; // ok — added on the fly
+x = "hello"; // ok
 ```
 
 ```ts
-// TS — locked shape 🔒
+// TS — locked
 let x: number = 5;
-x = "hello";     // ❌ Error at compile time
-// fields must be declared on the type first
+x = "hello"; // ❌
 ```
 
-> 🧩 **Remember:** JS = clay. TS = mold. Clay can become anything; mold keeps the shape.
+> JS = clay · TS = mold
 
----
+### Tooling you get
 
-## 🛠️ Why TS Feels Magical — Tooling
+| Feature | Does |
+|---|---|
+| Autocomplete | Suggests while you type |
+| Refactoring | Rename safely everywhere |
+| Go to Definition | Jump to the source |
+| Find References | See all usages |
+| Error Detection | Red squiggles before run |
+| Auto Import | Adds missing imports |
 
-| Tooling Feature | What it does | Sticky phrase |
-|---|---|---|
-| **Autocomplete** | Suggests props, methods, variables while typing | "It finishes your sentence" |
-| **Refactoring** | Rename / move / reorganize safely | "Change once, update everywhere" |
-| **Go to Definition** | Jump to where something is defined | "Teleport to the source" |
-| **Find References** | Show every place a symbol is used | "Who uses this?" |
-| **Error Detection** | Highlights type errors before you run | "Red squiggles = free QA" |
-| **Auto Import** | Adds missing imports automatically | "Don't type the path" |
-
----
-
-## ✍️ Intent — Write for Humans
-
-> TypeScript lets you **explicitly (clearly) express your intent**.
+Types also express **intent** clearly:
 
 ```ts
-// Intent is clear: this MUST be a user id (string), not "whatever"
-function getUser(id: string) { ... }
+function getUser(id: string) { ... } // id must be a string — no guessing
 ```
 
-**Rule of thumb:**
-- Computers can run messy code.
-- Humans need clear contracts.
-- Types = contracts everyone can read.
-
 ---
 
-## 📌 Cheat Sheet (glance before coding)
+## 2. Setup — `tsconfig.json`
 
-1. Transpiler  
-2. Future JS, today  
-3. Superset + static typing  
-4. JS pipeline: Future → Current → Supported  
-5. TS pipeline: **Types** → Future → Current → Supported  
-6. JS = dynamic (anything goes)  
-7. TS = static (type locked)  
-8. Errors at **compile** time, not runtime  
-9. Tooling = autocomplete, refactor, go-to, refs, errors, auto-import  
-10. Express intent clearly — code for humans  
+`tsconfig.json` = compiler rulebook (put it in project root).
 
----
-
-## 🔥 10-second recall quiz
-
-Ask yourself:
-
-1. What's the one extra step in the TS pipeline? → **Types**  
-2. When does TS catch errors? → **Compile time**  
-3. Can you add a field to a TS object freely? → **No — must be predefined**  
-4. Why bother? → **Safer code + better tooling + clearer intent**
-
----
-
-## ⚙️ Adding TypeScript to an Existing App — `tsconfig.json`
-
-> 🎯 **One-liner:** `tsconfig.json` = the rulebook that tells the TypeScript compiler *how* to work.
-
-### Step 1 — Create the rulebook
-
-Put `tsconfig.json` in the **project root** (e.g. `client/tsconfig.json`).
-
-Minimal starter:
+### Minimal starter
 
 ```json
 {
   "compilerOptions": {
     "target": "es5",
-    "outDir": "dist"
-  }
+    "outDir": "dist",
+    "rootDir": "src"
+  },
+  "include": ["src"]
 }
 ```
 
-| Option | Sticky meaning |
+### Useful options
+
+| Option | Meaning |
 |---|---|
-| **`target`** | "How old should the output JS be?" — `es5` = works in almost every browser |
-| **`outDir`** | "Where do the `.js` files go after transpile?" — usually `dist` |
+| `target` | Output JS level (`es5` = max browser support) |
+| `outDir` | Where `.js` files go (e.g. `dist`) |
+| `rootDir` | Source root (e.g. `src`) — needed with `outDir` in TS 7+ |
+| `allowJs` | Include `.js` / `.jsx` files |
+| `checkJs` | Type-check JS too (`false` = include, don't nag) |
+| `strict` | All strict checks ON |
+| `noEmit` | Don't write `.js` (Vite builds; TS only checks) |
+| `module` / `moduleResolution` | How imports work (`bundler` for Vite) |
+| `jsx` | JSX mode (`react-jsx` for React 17+) |
+| `skipLibCheck` | Skip `node_modules` type checks (faster) |
+| `isolatedModules` | Each file standalone (needed for Vite) |
+| `esModuleInterop` | Smoother CommonJS imports |
+| `include` | Which folders TS looks at |
 
-### Step 2 — Watch mode (auto-recompile)
+> Classic projects: `tsc` emits JS. Vite projects: often `noEmit: true`.
 
-```bash
-tsc -w
-```
+### Commands
 
-| Command | What happens |
+| Command | Does |
 |---|---|
-| `tsc` | Compile once |
-| `tsc -w` | **Watch** — recompiles every time you save |
+| `npx tsc` | Compile once |
+| `npx tsc -w` | Watch — recompile on save |
+| `npm run dev` | (our client) Vite + `tsc -w` together |
 
-> 🧩 **Remember:** `-w` = "keep watching my files."
+**Confirm setup:** create `hello.ts` → save → see `dist/hello.js`.
 
-### Step 3 — Prove it works
-
-1. Create a file like `hello.ts`
-2. Save it
-3. With `tsc -w` running, a `hello.js` appears in `outDir` (`dist`)
-
-```
-hello.ts  ──tsc──►  dist/hello.js
-   ↑                    ↑
- you write this      browser runs this
-```
-
-✅ `.ts` appears → `.js` appears = setup works.
+> Use `npx tsc` when TypeScript is installed locally (not global).
 
 ---
 
-## 📖 `compilerOptions` cheat sheet (our Vite client)
+## 3. Types and Type Checking
 
-| Option | What it does | Sticky phrase |
-|---|---|---|
-| **`target`** | JS version to compile *down to* | "How old is the output?" |
-| **`module`** | How `import` / `export` work | "Module style" |
-| **`moduleResolution`** | How TS finds imported files | `"bundler"` for Vite |
-| **`jsx`** | How JSX is transformed | `"react-jsx"` = no React import needed |
-| **`outDir`** | Folder for compiled JS | "Put output here" |
-| **`allowJs`** | Include `.js` / `.jsx` in the project | "JS files count too" |
-| **`checkJs`** | Type-check JS files | `false` = include, don't nag yet |
-| **`strict`** | All strict type checks ON | "Be picky (good for learning)" |
-| **`noEmit`** | Don't write `.js` files | "Vite builds; TS only checks" |
-| **`skipLibCheck`** | Skip checking `node_modules` | "Faster compiles" |
-| **`isolatedModules`** | Each file must stand alone | "Required by Vite/esbuild" |
-| **`esModuleInterop`** | Smoother imports from CommonJS libs | "Play nice with npm packages" |
-| **`include`** | Which folders TS looks at | `["src"]` = only source |
-
-> 💡 **Classic `tsc` projects:** use `target` + `outDir`, run `tsc -w`.  
-> **Vite projects:** often use `noEmit: true` — Vite emits JS; TS only type-checks.
-
----
-
-## 🔥 tsconfig recall quiz
-
-1. What file configures the TypeScript compiler? → **`tsconfig.json`**  
-2. Which option sets browser JS level? → **`target`** (e.g. `es5`)  
-3. Which option sets output folder? → **`outDir`**  
-4. How do you auto-recompile on save? → **`tsc -w`**  
-5. How do you confirm setup? → Create a `.ts` file → see `.js` in `outDir`
-
----
-
-## 🏷️ Types and Type Checking
-
-> 🎯 **One-liner:** Name → **colon** → type. Once set, TS locks it.
-
-### The syntax (burn this in)
+### Syntax
 
 ```ts
 let displayName: string = "Akansha";
-//              ↑
-//         colon + type
+//              ↑ colon + type
 ```
 
 | Pattern | Example |
@@ -230,52 +129,42 @@ let displayName: string = "Akansha";
 | Parameter | `function greet(name: string)` |
 | Return type | `function greet(name: string): string` |
 | No return | `function log(msg: string): void` |
+| Object return | `function getUser(): { name: string; age: number }` |
 
-> 🧩 **Mnemonic:** `name: type` — label first, type after the colon.
-
-### Once typed, TS enforces it
+Once typed, TS enforces it:
 
 ```ts
 let displayName: string = "Akansha";
-displayName = 42; // ❌ Error — string only, forever
+displayName = 42; // ❌
 ```
 
-**Sticky phrase:** *Assign a type → break the contract → red squiggle.*
+### 7 JS primitives
 
----
+`string` · `boolean` · `number` · `bigint` · `null` · `undefined` · `symbol`
 
-### 7️⃣ Seven JavaScript primitives
+| Type | Example |
+|---|---|
+| `string` | `"hello"` |
+| `boolean` | `true` / `false` |
+| `number` | `42`, `3.14` |
+| `bigint` | `99n` |
+| `null` | intentionally empty |
+| `undefined` | not set yet |
+| `symbol` | unique id |
 
-```
-string · boolean · number · bigint · null · undefined · symbol
-```
-
-| Type | Example | Remember as |
-|---|---|---|
-| `string` | `"hello"` | Text |
-| `boolean` | `true` / `false` | Yes/No switch |
-| `number` | `42`, `3.14` | All numbers (int + float) |
-| `bigint` | `9007199254740991n` | Huge integers |
-| `null` | `null` | Intentionally empty |
-| `undefined` | `undefined` | Not set yet |
-| `symbol` | `Symbol("id")` | Unique ID token |
-
-> 💡 **Mnemonic:** *SBN BNUS* → **S**tring, **B**oolean, **N**umber, **B**igint, **N**ull, **U**ndefined, **S**ymbol  
-> Or: *"Some Booleans Need Big Null Undefined Symbols"*
-
----
-
-### Functions — params + return type
+### Functions
 
 ```ts
-// params typed + return typed
 function add(a: number, b: number): number {
   return a + b;
 }
 
-// no return value → void
 function logMessage(msg: string): void {
   console.log(msg);
+}
+
+function getAge(): number {
+  return "25"; // ❌ return type mismatch
 }
 ```
 
@@ -283,318 +172,254 @@ function logMessage(msg: string): void {
 |---|---|
 | Param type | What goes **in** |
 | Return type | What comes **out** |
-| `void` | Comes out with **nothing** |
+| `void` | Returns **nothing** |
 
-**TS catches mismatches:**
+### Inline object return type (important syntax)
+
+Declare the **full shape** of the returned object after the colon:
 
 ```ts
-function getAge(): number {
-  return "25"; // ❌ declared number, returned string
+function getInventoryItem(trackingNumber: string): {
+  displayName: string;
+  inventoryType: string;
+  trackingNumber: string;
+  createDate: Date;
+  originalCost: number;
+} {
+  return null; // ❌ Error — null is not that object shape
 }
 ```
 
-> 🧩 **Remember:** Return type = a promise to the caller. Break it → compile error.
-
----
-
-### Inline object return shape
-
-Define the returned object's structure right on the function:
+**Correct version — return must match the shape:**
 
 ```ts
-function getUser(): { name: string; age: number } {
+function getInventoryItem(trackingNumber: string): {
+  displayName: string;
+  inventoryType: string;
+  trackingNumber: string;
+  createDate: Date;
+  originalCost: number;
+} {
   return {
-    name: "Akansha",
-    age: 25,
-  };
-}
-
-// ❌ Error — missing age, or wrong types
-function badUser(): { name: string; age: number } {
-  return { name: "Akansha" };
+    displayName: "MacBook Pro",
+    inventoryType: "computer",
+    trackingNumber: trackingNumber,
+    createDate: new Date(),
+    originalCost: 1200,
+  }; // ✅ matches every property + type
 }
 ```
 
-**Sticky visual:**
-
 ```
-function  →  { prop: type; prop: type }
-   ↑                    ↑
-  name           blueprint of the return
+function name(param: type): { prop: type; prop: type } { ... }
+         ↑        ↑              ↑
+       name    input type    inline return shape
 ```
 
+> If even one property is missing or wrong type → compile error.
 ---
 
-### 📌 Types cheat sheet
-
-1. Syntax: `name: type`  
-2. Type assigned → enforced forever  
-3. 7 primitives: string, boolean, number, bigint, null, undefined, symbol  
-4. Type params **and** return value  
-5. `void` = returns nothing  
-6. Wrong return type → compile error  
-7. Inline `{ prop: type }` = object shape
-
----
-
-## 🔥 Types recall quiz
-
-1. What's the type syntax? → **`name: type`** (colon after the name)  
-2. How many JS primitives? → **7**  
-3. Function that returns nothing uses? → **`void`**  
-4. Can return type differ from what you actually return? → **No — TS errors**  
-5. How do you type a returned object inline? → **`: { prop: type; ... }`**
-
----
-
-## 🔮 Type Inference, `any`, and `as`
-
-> 🎯 **One-liner:** TS often *guesses* your type. `any` says "don't check." `as` says "trust me."
-
----
-
-### 1) Type Inference — TS guesses for you
-
-You write a value → TS figures out the type. No annotation needed.
-
-```ts
-let name = "Akansha";  // TS infers: string
-let age = 25;          // TS infers: number
-let ok = true;         // TS infers: boolean
-
-name = 10; // ❌ still error — inferred as string, locked
-```
-
-| Idea | Sticky phrase |
-|---|---|
-| Inference | "TS reads the value and picks the type" |
-| Cleaner code | Less typing, same safety |
-| Still enforced | Inferred ≠ free to change later |
-
-> 🧩 **Remember:** Inference = auto-label. Once labeled, still locked.
-
----
-
-### 2) Gradual Typing — type only when you want
-
-TS lets you mix checked and unchecked code.
-
-```
-Full safety  ←————————→  Full freedom
-  string         any          (like JS)
-```
-
-- Want safety? Use real types (or let TS infer).
-- Need a temporary escape hatch? Use `any`.
-- Use `any` **sparingly** — every `any` turns off the alarm.
-
----
-
-### 3) Why type safety helps
-
-When TS knows the type, you get:
-
-| Benefit | What you feel |
-|---|---|
-| Compile-time errors | Bugs before you run |
-| Autocomplete | "It finishes your sentence" |
-| Better warnings | "Hey, that property doesn't exist" |
-
-> 💡 **Sticky:** Types = free bodyguard + free autocomplete.
-
----
-
-### 4) Explicit Typing — say it yourself
-
-Inference is smart. Explicit is clearer for humans.
-
-```ts
-// inferred
-let title = "Notes";
-
-// explicit — clearer intent
-let title: string = "Notes";
-
-function getId(): number {
-  return 1;
-}
-```
-
-| Prefer explicit when… | Why |
-|---|---|
-| Function params / returns | Contract is obvious |
-| Complex objects | Shape is documented |
-| Public APIs | Other people read it |
-
-> 🧩 **Rule:** Inference for simple locals. Explicit for important contracts.
-
----
-
-### 5) `any` — the "off switch"
-
-`any` disables type checking for that value (behaves like JS).
-
-```ts
-let data: any = "hello";
-data = 42;        // ✅ allowed
-data = true;      // ✅ allowed
-data.foo.bar();   // ✅ allowed (dangerous — may crash at runtime)
-```
-
-| | Real type | `any` |
-|---|---|---|
-| Safety | ✅ On | ❌ Off |
-| Autocomplete | ✅ Strong | ❌ Weak |
-| Feels like | TypeScript | JavaScript |
-
-> ⚠️ **Sticky phrase:** `any` = "I quit TypeScript for this variable."
-
----
-
-### 6) `as` — "Trust me" (type assertion)
-
-> 🎯 **Simple idea:** TypeScript is unsure. **You** know better.  
-> `as` means: *"TS, treat this value as THIS type."*
-
-It does **not** convert the value. It only changes how TS *thinks* about it.
-
-```
-Real value stays the same
-         ↓
-  "42" as number   ❌ still the string "42" at runtime
-         ↓
-  Only the TYPE LABEL changes in TypeScript's mind
-```
-
-> 🧩 **Sticky analogy:**  
-> Value = a sealed box.  
-> Type = the label on the box.  
-> `as` = you slap a new label on — you don't open or change what's inside.
-
----
-
-#### Example 1 — DOM element (most common)
-
-```ts
-// TS knows: getElementById can return HTMLElement | null
-const el = document.getElementById("app");
-
-// el.innerText = "Hi";  
-// ❌ TS: might be null, and HTMLElement is too generic
-
-// You KNOW this id is a <div> that exists:
-const app = document.getElementById("app") as HTMLDivElement;
-app.innerText = "Hi"; // ✅ TS trusts you
-```
-
-**What you told TS:** *"This is definitely a div."*
-
----
-
-#### Example 2 — JSON from an API
-
-```ts
-type Note = { id: string; title: string };
-
-const raw = '{"id":"1","title":"Learn TS"}';
-
-// JSON.parse returns `any` (or unknown in strict setups)
-// You know the shape, so you assert it:
-const note = JSON.parse(raw) as Note;
-
-console.log(note.title); // ✅ autocomplete works
-```
-
-**What you told TS:** *"This parsed JSON is a Note."*
-
-⚠️ If the JSON is actually `{ "foo": 1 }`, TS won't warn you — runtime can still break.
-
----
-
-#### Example 3 — Event target
-
-```ts
-function onChange(e: Event) {
-  // e.target is EventTarget | null — too vague for TS
-  const input = e.target as HTMLInputElement;
-  console.log(input.value); // ✅ now TS knows it's an <input>
-}
-```
-
-**What you told TS:** *"This event came from an input."*
-
----
-
-#### Example 4 — Good vs Bad `as`
-
-```ts
-// ✅ GOOD — you are correct about the real value
-const box = document.querySelector(".card") as HTMLDivElement;
-
-// ❌ BAD — you lied to TypeScript
-const age = "twenty" as unknown as number;
-console.log(age + 1); // runs… but result is weird/"twenty1"
-// TS is happy. Your app is not.
-```
-
-| Situation | Use `as`? |
-|---|---|
-| You truly know the type (DOM id, API shape you control) | ✅ OK |
-| You're guessing / silencing an error | ❌ Avoid |
-| You want to *convert* `"42"` → `42` | ❌ Use `Number("42")`, not `as` |
-
----
-
-#### `as` vs `:` (don't mix them up)
-
-```ts
-// Explicit type (declaration) — value MUST match
-let title: string = "Notes";
-let title: string = 123; // ❌ Error
-
-// Assertion (as) — you FORCE the label
-let data = 123 as string; // TS accepts… even though it's wrong
-```
-
-| | `:` explicit | `as` assertion |
-|---|---|---|
-| Who decides? | You declare, TS **checks** | You declare, TS **believes** |
-| Wrong value? | ❌ Compile error | ✅ Compiles (danger) |
-| Changes runtime value? | No | No |
-
-> ⚠️ **Final sticky:**  
-> `:` = "check me"  
-> `as` = "believe me"  
-> `any` = "ignore me"
-
----
-
-### 📌 Instant cheat sheet
+## 4. Inference, Explicit, `any`, `as`
 
 | Tool | Meaning | Risk |
 |---|---|---|
-| **Inference** | TS auto-detects type | Low — still safe |
-| **Explicit `:`** | You write the type | Lowest — clearest |
-| **`any`** | Turn checking off | High — use rarely |
-| **`as`** | Override TS's opinion | Medium/High — only when sure |
-
-**Tiny decision guide:**
+| **Inference** | TS guesses type from the value | Low |
+| **Explicit `:`** | You write the type; TS checks | Lowest |
+| **`any`** | Turns checking **off** (like JS) | High — rare |
+| **`as`** | You force the type label; TS believes you | Medium/High |
 
 ```
-Can TS guess it?     → let it infer
-Is it an API/param?  → type it explicitly
-Stuck with unknown?  → prefer unknown + narrow, not any
-100% sure of type?   → as (carefully)
-Just want JS back?   → any (last resort)
+:`  = "check me"
+as  = "believe me"
+any = "ignore me"
+```
+
+### Inference
+
+```ts
+let name = "Akansha"; // inferred: string
+name = 10;            // ❌ still locked
+```
+
+Use inference for simple locals. Use **explicit** types for params, returns, and public APIs.
+
+### Gradual typing
+
+You choose how much safety: real types ↔ `any` (escape hatch). Prefer types; use `any` sparingly.
+
+### `any`
+
+```ts
+let data: any = "hello";
+data = 42;        // ✅
+data.foo.bar();   // ✅ compiles — may crash at runtime
+```
+
+### `as` (type assertion)
+
+Does **not** convert the value — only changes the type label TS uses.
+
+> Value = sealed box · Type = sticker · `as` = new sticker (contents unchanged)
+
+```ts
+// ✅ OK — you know it's a div
+const app = document.getElementById("app") as HTMLDivElement;
+app.innerText = "Hi";
+
+// ✅ OK — you know the JSON shape
+type Note = { id: string; title: string };
+const note = JSON.parse(raw) as Note;
+
+// ✅ OK — event from an input
+const input = e.target as HTMLInputElement;
+console.log(input.value);
+
+// ❌ BAD — lying to TS (still a string at runtime)
+const age = "twenty" as unknown as number;
+```
+
+| Use `as` when… | Avoid when… |
+|---|---|
+| You truly know the type (DOM, API you control) | Guessing / silencing errors |
+| | Converting values — use `Number("42")`, not `as` |
+
+### Decision guide
+
+```
+Can TS guess it?        → infer
+API / param / return?   → explicit :
+100% sure of type?      → as (carefully)
+Just want JS freedom?   → any (last resort)
 ```
 
 ---
 
-## 🔥 Inference / any / as quiz
+## 5. Master quiz
 
-1. What is type inference? → **TS auto-detects the type from the value**  
-2. Does inferred type still get enforced? → **Yes**  
-3. What does `any` do? → **Turns off type checking**  
-4. When should you use `any`? → **Sparingly / last resort**  
-5. What does `as` mean? → **"Trust me, this is that type"**  
-6. Explicit vs inferred — which is clearer for APIs? → **Explicit**
+1. Extra step in TS pipeline? → **Types**  
+2. When does TS catch errors? → **Compile time**  
+3. Type syntax? → **`name: type`**  
+4. How many primitives? → **7**  
+5. No return value? → **`void`**  
+6. Config file name? → **`tsconfig.json`**  
+7. Watch mode? → **`npx tsc -w`**  
+8. Inference still enforced? → **Yes**  
+9. `any` does what? → **Turns checking off**  
+10. `as` means? → **"Believe me"** (label only, no conversion)  
+11. `:` vs `as`? → **`:` checks · `as` trusts**  
+12. Inline return object — can you `return null`? → **No** (unless type allows null)  
+13. What must match an inline return shape? → **Every property name + type**
+
+---
+
+## 6. Mnemonics + good syntax examples
+
+### Mnemonics (say them out loud)
+
+| Topic | Mnemonic | Meaning |
+|---|---|---|
+| What is TS | **"JS + types + tools"** | That's all TS is |
+| When errors show | **"TS = before run, JS = while run"** | Compile vs runtime |
+| Pipeline | **"Types first, then the JS train"** | Types → Future → Current → Supported |
+| JS vs TS | **"Clay vs mold"** | Clay reshapes; mold keeps shape |
+| Type syntax | **"Name, colon, type"** | `age: number` |
+| 7 primitives | **"Some Booleans Need Big Null Undefined Symbols"** | string, boolean, number, bigint, null, undefined, symbol |
+| Functions | **"In → out → void"** | params in, return out, void = nothing |
+| Inline object | **"Colon, curly, props"** | `): { a: string; b: number }` |
+| Inference | **"Auto-sticker, still stuck"** | TS guesses type; still locked |
+| `:` / `as` / `any` | **"Check me · Believe me · Ignore me"** | explicit / assertion / any |
+| `as` | **"New sticker, same box"** | Label changes, value doesn't |
+| `tsc -w` | **"W = Watch forever"** | Recompiles on every save |
+
+---
+
+### Good syntax examples (copy these patterns)
+
+#### A) Variable
+
+```ts
+let displayName: string = "MacBook";
+let originalCost: number = 1200;
+let isAvailable: boolean = true;
+```
+
+#### B) Function — params + return
+
+```ts
+function calculateTax(cost: number, rate: number): number {
+  return cost * rate;
+}
+```
+
+#### C) Function — void
+
+```ts
+function printLabel(label: string): void {
+  console.log(label);
+}
+```
+
+#### D) Inline object return (from lesson screenshot)
+
+```ts
+function getInventoryItem(trackingNumber: string): {
+  displayName: string;
+  inventoryType: string;
+  trackingNumber: string;
+  createDate: Date;
+  originalCost: number;
+} {
+  return {
+    displayName: "Office Chair",
+    inventoryType: "furniture",
+    trackingNumber: trackingNumber,
+    createDate: new Date(),
+    originalCost: 299,
+  };
+}
+```
+
+#### E) Inference vs explicit
+
+```ts
+let title = "Notes";           // inferred: string
+let title: string = "Notes";   // explicit: string
+```
+
+#### F) `any` vs real type
+
+```ts
+let loose: any = "hello";
+loose = 99; // allowed — no safety
+
+let tight: string = "hello";
+tight = 99; // ❌ blocked
+```
+
+#### G) `as` — correct usage
+
+```ts
+const el = document.getElementById("app") as HTMLDivElement;
+el.innerText = "Inventory App";
+```
+
+#### H) `as` — wrong usage (don't do this)
+
+```ts
+const cost = "1200" as unknown as number; // TS happy, runtime still string
+const realCost = Number("1200");          // ✅ actual conversion
+```
+
+---
+
+### 30-second story
+
+1. Compiler = strict teacher (compile time).  
+2. `name: type` = fill the form correctly.  
+3. Inference = auto-guess — still locked.  
+4. `any` = free period (no checking).  
+5. `as` = new sticker — contents unchanged.  
+6. Inline `{ ... }` return = form with required fields.  
+7. `tsconfig` = rulebook · `tsc -w` = watch on save.
+
+> **Check me (`:`) · Believe me (`as`) · Ignore me (`any`)**
