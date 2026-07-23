@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getNotes, createNote, updateNote, deleteNote } from "./api.js";
+import { getNotes, createNote, updateNote, deleteNote } from "./api.ts";
 
 const emptyForm = { title: "", content: "" };
 

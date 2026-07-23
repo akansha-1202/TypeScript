@@ -209,3 +209,138 @@ hello.ts  ──tsc──►  dist/hello.js
 3. Which option sets output folder? → **`outDir`**  
 4. How do you auto-recompile on save? → **`tsc -w`**  
 5. How do you confirm setup? → Create a `.ts` file → see `.js` in `outDir`
+
+---
+
+## 🏷️ Types and Type Checking
+
+> 🎯 **One-liner:** Name → **colon** → type. Once set, TS locks it.
+
+### The syntax (burn this in)
+
+```ts
+let displayName: string = "Akansha";
+//              ↑
+//         colon + type
+```
+
+| Pattern | Example |
+|---|---|
+| Variable | `let age: number = 25` |
+| Parameter | `function greet(name: string)` |
+| Return type | `function greet(name: string): string` |
+| No return | `function log(msg: string): void` |
+
+> 🧩 **Mnemonic:** `name: type` — label first, type after the colon.
+
+### Once typed, TS enforces it
+
+```ts
+let displayName: string = "Akansha";
+displayName = 42; // ❌ Error — string only, forever
+```
+
+**Sticky phrase:** *Assign a type → break the contract → red squiggle.*
+
+---
+
+### 7️⃣ Seven JavaScript primitives
+
+```
+string · boolean · number · bigint · null · undefined · symbol
+```
+
+| Type | Example | Remember as |
+|---|---|---|
+| `string` | `"hello"` | Text |
+| `boolean` | `true` / `false` | Yes/No switch |
+| `number` | `42`, `3.14` | All numbers (int + float) |
+| `bigint` | `9007199254740991n` | Huge integers |
+| `null` | `null` | Intentionally empty |
+| `undefined` | `undefined` | Not set yet |
+| `symbol` | `Symbol("id")` | Unique ID token |
+
+> 💡 **Mnemonic:** *SBN BNUS* → **S**tring, **B**oolean, **N**umber, **B**igint, **N**ull, **U**ndefined, **S**ymbol  
+> Or: *"Some Booleans Need Big Null Undefined Symbols"*
+
+---
+
+### Functions — params + return type
+
+```ts
+// params typed + return typed
+function add(a: number, b: number): number {
+  return a + b;
+}
+
+// no return value → void
+function logMessage(msg: string): void {
+  console.log(msg);
+}
+```
+
+| Idea | Meaning |
+|---|---|
+| Param type | What goes **in** |
+| Return type | What comes **out** |
+| `void` | Comes out with **nothing** |
+
+**TS catches mismatches:**
+
+```ts
+function getAge(): number {
+  return "25"; // ❌ declared number, returned string
+}
+```
+
+> 🧩 **Remember:** Return type = a promise to the caller. Break it → compile error.
+
+---
+
+### Inline object return shape
+
+Define the returned object's structure right on the function:
+
+```ts
+function getUser(): { name: string; age: number } {
+  return {
+    name: "Akansha",
+    age: 25,
+  };
+}
+
+// ❌ Error — missing age, or wrong types
+function badUser(): { name: string; age: number } {
+  return { name: "Akansha" };
+}
+```
+
+**Sticky visual:**
+
+```
+function  →  { prop: type; prop: type }
+   ↑                    ↑
+  name           blueprint of the return
+```
+
+---
+
+### 📌 Types cheat sheet
+
+1. Syntax: `name: type`  
+2. Type assigned → enforced forever  
+3. 7 primitives: string, boolean, number, bigint, null, undefined, symbol  
+4. Type params **and** return value  
+5. `void` = returns nothing  
+6. Wrong return type → compile error  
+7. Inline `{ prop: type }` = object shape
+
+---
+
+## 🔥 Types recall quiz
+
+1. What's the type syntax? → **`name: type`** (colon after the name)  
+2. How many JS primitives? → **7**  
+3. Function that returns nothing uses? → **`void`**  
+4. Can return type differ from what you actually return? → **No — TS errors**  
+5. How do you type a returned object inline? → **`: { prop: type; ... }`**
